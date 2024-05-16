@@ -10,13 +10,11 @@ import (
 	"github.com/peanut996/CloudflareWarpSpeedTest/utils"
 )
 
-var (
-	Version string
-)
+var Version string
 
 func init() {
 	var printVersion bool
-	var help = `
+	help := `
 CloudflareWarpSpeedTest ` + Version + `
 Test the latency and speed of all Cloudflare Warp IPs to obtain the lowest latency and port.
 
@@ -95,7 +93,8 @@ func main() {
 	task.InitRandSeed()
 	task.InitHandshakePacket()
 
-	fmt.Printf("CloudflareWarpSpeedTest\n\n")
+	fmt.Println()
+	fmt.Printf(utils.CatppuccinMochaGreen + "Cloudflare Warp SpeedTest" + utils.ColorReset + "\n\n")
 
 	pingData := task.NewWarping().Run().FilterDelay().FilterLossRate()
 	utils.ExportCsv(pingData)

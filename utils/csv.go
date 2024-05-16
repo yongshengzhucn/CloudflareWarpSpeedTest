@@ -25,11 +25,9 @@ var (
 	PrintNum         = 10
 )
 
-
 func NoPrintResult() bool {
 	return PrintNum == 0
 }
-
 
 func noOutput() bool {
 	return Output == "" || Output == " "
@@ -46,7 +44,6 @@ type CloudflareIPData struct {
 	*PingData
 	lossRate float32
 }
-
 
 func (cf *CloudflareIPData) getLossRate() float32 {
 	if cf.lossRate == 0 {
@@ -74,7 +71,7 @@ func ExportCsv(data []CloudflareIPData) {
 		return
 	}
 	defer fp.Close()
-	w := csv.NewWriter(fp) 
+	w := csv.NewWriter(fp)
 	_ = w.Write([]string{"IP:Port", "Loss", "Latency"})
 	_ = w.WriteAll(convertToString(data))
 	w.Flush()
@@ -88,38 +85,36 @@ func convertToString(data []CloudflareIPData) [][]string {
 	return result
 }
 
-
 type PingDelaySet []CloudflareIPData
 
-
 func (s PingDelaySet) FilterDelay() (data PingDelaySet) {
-	if InputMaxDelay > maxDelay || InputMinDelay < minDelay { 
+	if InputMaxDelay > maxDelay || InputMinDelay < minDelay {
 		return s
 	}
-	if InputMaxDelay == maxDelay && InputMinDelay == minDelay { 
+	if InputMaxDelay == maxDelay && InputMinDelay == minDelay {
 		return s
 	}
 	for _, v := range s {
-		if v.Delay > InputMaxDelay { 
+		if v.Delay > InputMaxDelay {
 			break
 		}
-		if v.Delay < InputMinDelay { 
+		if v.Delay < InputMinDelay {
 			continue
 		}
-		data = append(data, v) 
+		data = append(data, v)
 	}
 	return
 }
 
 func (s PingDelaySet) FilterLossRate() (data PingDelaySet) {
-	if InputMaxLossRate >= maxLossRate { 
+	if InputMaxLossRate >= maxLossRate {
 		return s
 	}
 	for _, v := range s {
-		if v.getLossRate() > InputMaxLossRate { 
+		if v.getLossRate() > InputMaxLossRate {
 			break
 		}
-		data = append(data, v) 
+		data = append(data, v)
 	}
 	return
 }
@@ -127,6 +122,7 @@ func (s PingDelaySet) FilterLossRate() (data PingDelaySet) {
 func (s PingDelaySet) Len() int {
 	return len(s)
 }
+
 func (s PingDelaySet) Less(i, j int) bool {
 	iRate, jRate := s[i].getLossRate(), s[j].getLossRate()
 	if iRate != jRate {
@@ -134,6 +130,7 @@ func (s PingDelaySet) Less(i, j int) bool {
 	}
 	return s[i].Delay < s[j].Delay
 }
+
 func (s PingDelaySet) Swap(i, j int) {
 	s[i], s[j] = s[j], s[i]
 }
@@ -142,27 +139,27 @@ func (s PingDelaySet) Print() {
 	if NoPrintResult() {
 		return
 	}
-	if len(s) <= 0 { 
-		fmt.Println("\n[Info] The total number of IP addresses in the complete speed test results is 0, so skipping the output.")
+	if len(s) <= 0 {
+		fmt.Println("\n" + CatppuccinMochaYellow + "[Info] The total number of IP addresses in the complete speed test results is 0, so skipping the output." + ColorReset)
 		return
 	}
-	dataString := convertToString(s) 
-	if len(dataString) < PrintNum { 
+	dataString := convertToString(s)
+	if len(dataString) < PrintNum {
 		PrintNum = len(dataString)
 	}
-	headFormat := "\n%-24s%-9s%-10s\n"
-	dataFormat := "%-25s%-8s%-10s\n"
+	headFormat := "\n%s%-24s%-9s%-10s%s\n"
+	dataFormat := "%s%-25s%-8s%-10s%s\n"
 	for i := 0; i < PrintNum; i++ {
 		if len(dataString[i][0]) > 15 {
-			headFormat = "\n%-44s%-9s%-10s\n"
-			dataFormat = "%-45s%-8s%-10s\n"
+			headFormat = "\n%s%-44s%-9s%-10s%s\n"
+			dataFormat = "%s%-45s%-8s%-10s%s\n"
 		}
 	}
-	fmt.Printf(headFormat, "IP:Port", "Loss", "Latency")
+	fmt.Printf(headFormat, CatppuccinMochaYellow, "IP:Port", "Loss", "Latency", ColorReset)
 	for i := 0; i < PrintNum; i++ {
-		fmt.Printf(dataFormat, dataString[i][0], dataString[i][1], dataString[i][2])
+		fmt.Printf(dataFormat, CatppuccinMochaBlue, dataString[i][0], dataString[i][1], dataString[i][2], ColorReset)
 	}
 	if !noOutput() {
-		fmt.Printf("\nComplete speed test results have been written to the %v file.\n", Output)
+		fmt.Printf("\n%sComplete speed test results have been written to the %v file.%s\n", CatppuccinMochaGrey, Output, ColorReset)
 	}
 }

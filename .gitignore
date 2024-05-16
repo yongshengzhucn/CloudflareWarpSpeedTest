@@ -4,3 +4,4 @@ Releases
 *.csv
 .idea
 .vscode
+.tool-versions
